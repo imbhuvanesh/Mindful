@@ -67,8 +67,7 @@ class LockService extends ChangeNotifier {
         await _zo.initialize(blockScreenCallback: onBlockScreenRequested);
         await _zo.setNotificationConfig(
           notificationBannerTitle: 'Mindful has locked a few apps',
-          notificationBannerDescription:
-              'They unlock automatically in about an hour.',
+          notificationBannerDescription: 'They unlock automatically.',
         );
       } catch (_) {}
     }
@@ -118,14 +117,18 @@ class LockService extends ChangeNotifier {
 
   /// Unlocks the given apps now (no-op for anything not locked).
   Future<void> unlockMany(List<String> packageNames) async {
+    if (packageNames.isEmpty) return;
     var changed = false;
     for (final pkg in packageNames) {
       _timers.remove(pkg)?.cancel();
       if (_locks.remove(pkg) != null) changed = true;
     }
-    if (!changed) return;
+    // Persist + sync even when nothing was locally locked: this drains
+    // expired entries from prefs and tells the plugin to unblock stale
+    // packages (their app_time_limits rows are cleaned up in _syncToPlugin).
     await _persist();
     await _syncToPlugin();
+    if (!changed) return;
     notifyListeners();
   }
 

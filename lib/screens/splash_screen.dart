@@ -1,14 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/colors.dart';
 import '../widgets/glass_background.dart';
 
 /// Branded preloader: reveals "MINDFUL" one letter at a time, then fills a
 /// progress bar before handing off to the app ([onDone]).
+///
+/// Runs full-screen (system bars hidden while visible) every time the app is
+/// opened.
 class MindfulSplashScreen extends StatefulWidget {
-  const MindfulSplashScreen({super.key, this.onDone});
+  const MindfulSplashScreen({
+    super.key,
+    this.onDone,
+    this.manageSystemUi = true,
+  });
 
   final VoidCallback? onDone;
+
+  /// Whether this splash manages the system bars (hides them while visible,
+  /// restores them when gone). Pass `false` when embedding the splash inside
+  /// another full-screen view (e.g. the block alert) that owns its own bars.
+  final bool manageSystemUi;
 
   @override
   State<MindfulSplashScreen> createState() => _MindfulSplashScreenState();
@@ -40,11 +55,22 @@ class _MindfulSplashScreenState extends State<MindfulSplashScreen>
         }
       });
     _controller.forward();
+
+    // Full screen: hide the status + navigation bars while the splash is up.
+    if (widget.manageSystemUi) {
+      unawaited(
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky),
+      );
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    // Restore the system bars for the main app.
+    if (widget.manageSystemUi) {
+      unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+    }
     super.dispose();
   }
 

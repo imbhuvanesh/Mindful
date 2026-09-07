@@ -30,12 +30,14 @@ class _BlockScreenState extends State<_BlockScreen> {
   @override
   void initState() {
     super.initState();
-    // Truly full screen: hide status + navigation bars.
-    unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky));
+    _makeFullScreen();
 
     // Fallback so the preloader is never stuck if the icon never arrives.
     _revealTimer = Timer(const Duration(milliseconds: 900), () {
-      if (mounted) setState(() => _revealed = true);
+      if (mounted) {
+        _makeFullScreen();
+        setState(() => _revealed = true);
+      }
     });
   }
 
@@ -44,8 +46,15 @@ class _BlockScreenState extends State<_BlockScreen> {
     super.didUpdateWidget(oldWidget);
     // Icon/name arrived via the two-phase update — reveal immediately.
     if (_hasData && !_revealed && mounted) {
+      _makeFullScreen();
       setState(() => _revealed = true);
     }
+  }
+
+  // Truly full screen: hide status + navigation bars on every branch so the
+  // alert never shows the system bars, no matter which phase it's in.
+  void _makeFullScreen() {
+    unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky));
   }
 
   @override
@@ -60,12 +69,10 @@ class _BlockScreenState extends State<_BlockScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_revealed && !_hasData) {
-      return const MindfulSplashScreen();
+      return const MindfulSplashScreen(manageSystemUi: false);
     }
 
     final app = widget.body.appName ?? 'this app';
-    final topInset = MediaQuery.paddingOf(context).top;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -84,8 +91,7 @@ class _BlockScreenState extends State<_BlockScreen> {
         backgroundColor: MindfulColors.black,
         body: GlassBackground(
           child: Padding(
-            padding:
-                EdgeInsets.fromLTRB(32, topInset + 16, 32, bottomInset + 16),
+            padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -120,9 +126,9 @@ class _BlockScreenState extends State<_BlockScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'This app is taking a one-hour pause. Mindful unlocks it '
-                  'automatically when the time is up — this little break is '
-                  'yours. Take a breath, look up, come back to your day.',
+                  'This app is locked for now. Mindful unlocks it automatically '
+                  'when the time is up — this little break is yours. Take a '
+                  'breath, look up, come back to your day.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,

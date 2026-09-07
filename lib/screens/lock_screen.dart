@@ -10,7 +10,7 @@ import '../widgets/glass_background.dart';
 import '../widgets/glass_card.dart';
 
 /// Shows a permission gate followed by an installable-apps list with
-/// checkboxes, finishing with a "lock for 1 hour" button.
+/// checkboxes, finishing with a lock button.
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
 
@@ -331,7 +331,7 @@ class _AppPickerState extends State<_AppPicker> {
               child: widget.selected.isEmpty
                   ? const Text('Select an app')
                   : Text(
-                      'Lock ${widget.selected.length} app${widget.selected.length == 1 ? '' : 's'} for 1 hour'),
+                      'Lock ${widget.selected.length} app${widget.selected.length == 1 ? '' : 's'}'),
             ),
           ),
         ),

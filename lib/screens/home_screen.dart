@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../models/app_lock.dart';
@@ -9,8 +7,8 @@ import '../widgets/app_icon_widget.dart';
 import '../widgets/glass_card.dart';
 import 'lock_screen.dart';
 
-/// Lock tab: a prominent Lock button, the currently locked apps with live
-/// per-app countdowns, and an option to lock more.
+/// Lock tab: a prominent Lock button, the currently locked apps, and an
+/// option to lock more.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,20 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Timer _ticker;
   final Set<String> _removing = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _ticker.cancel();
-    super.dispose();
-  }
 
   Future<void> _openLockScreen() async {
     final added = await Navigator.of(context).push<bool>(
@@ -106,8 +91,8 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pick the apps that distract you most. Mindful locks them for an '
-            'hour so you can focus.',
+            'Pick the apps that distract you most. Mindful locks them '
+            'so you can focus.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: MindfulColors.gray,
@@ -149,8 +134,7 @@ class _LocksView extends StatelessWidget {
         const _Brand(),
         const SizedBox(height: 8),
         Text(
-          '${locks.length} app${locks.length == 1 ? '' : 's'} locked · '
-          'unlocks at ${_clockTime(locks.first.lockedUntil)}',
+          '${locks.length} app${locks.length == 1 ? '' : 's'} locked',
           style: const TextStyle(color: MindfulColors.gray, fontSize: 13),
         ),
         const SizedBox(height: 16),
@@ -174,9 +158,6 @@ class _LocksView extends StatelessWidget {
       ],
     );
   }
-
-  static String _clockTime(DateTime t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 }
 
 class _SwipeUnlockBackground extends StatelessWidget {
@@ -241,20 +222,6 @@ class _LockCard extends StatefulWidget {
 }
 
 class _LockCardState extends State<_LockCard> {
-  late Timer _ticker;
-
-  @override
-  void initState() {
-    super.initState();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _ticker.cancel();
-    super.dispose();
-  }
-
   Future<void> _confirmUnlock() async {
     final app = widget.lock;
     final confirmed = await showDialog<bool>(
@@ -283,13 +250,6 @@ class _LockCardState extends State<_LockCard> {
   @override
   Widget build(BuildContext context) {
     final lock = widget.lock;
-    final remaining = lock.lockRemaining;
-    final h = remaining.inHours;
-    final m = remaining.inMinutes % 60;
-    final s = remaining.inSeconds % 60;
-    final countdown = h > 0
-        ? '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}'
-        : '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
 
     return GlassCard(
       padding: const EdgeInsets.all(12),
@@ -302,28 +262,14 @@ class _LockCardState extends State<_LockCard> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lock.appName,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: MindfulColors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Unlocks in $countdown',
-                  style: const TextStyle(
-                    color: MindfulColors.mist,
-                    fontSize: 13,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
+            child: Text(
+              lock.appName,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: MindfulColors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
             ),
           ),
           TextButton(

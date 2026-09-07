@@ -416,10 +416,9 @@ packages:
   zo_app_blocker:
     dependency: "direct main"
     description:
-      name: zo_app_blocker
-      sha256: "824d8991366c604653de4ad17bd4355d5d571cf1fea5dc33c962c615fd41e5ab"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/zo_app_blocker"
+      relative: true
+    source: path
     version: "0.0.6"
 sdks:
   dart: ">=3.13.0 <4.0.0"

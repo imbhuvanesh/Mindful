@@ -34,8 +34,29 @@ class _Root extends StatefulWidget {
   State<_Root> createState() => _RootState();
 }
 
-class _RootState extends State<_Root> {
+class _RootState extends State<_Root> with WidgetsBindingObserver {
   bool _splashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Replay the full-screen splash every time the app comes back to the
+    // foreground (home press → return, app switch, etc.).
+    if (state == AppLifecycleState.resumed && _splashDone) {
+      setState(() => _splashDone = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
